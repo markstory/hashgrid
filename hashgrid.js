@@ -3,18 +3,86 @@
  * http://github.com/dotjay/hashgrid
  * Version 1, 21 Dec 2009
  * By Jon Gibbins, accessibility.co.uk
+ *
+ * Ported to work with Mootools by Mark Story (http://mark-story.com)
  */
+window.addEvent('domready', function () {
+	var grid = new GridOverlay('grid');
+})
 
+var GridOverlay = new Class({
+	Implements: [Options, Events],
+
+	options : {
+		cookiePrefix: 'gridOverlay'
+	},
+	overlay: null,
+	visible: false,
+	sticky: false,
+
+	initialize: function (id, options) {
+		this.setOptions(options || {});
+		var overlayEl = new Element('div', {
+			id: id,
+			styles: {display: 'none'}
+		});
+
+		//remove the existing element if any and append to the DOM
+		if (document.id(id)) document.id(id).destroy();
+		document.id(document.body).adopt(overlayEl);
+		this.overlay = document.id(id);
+
+		//set the z-index
+		var zIndex = this.overlay.getStyle('zIndex');
+		if (zIndex == 'auto') {
+			this.overlay.setStyle('zIndex', '-1');
+		}
+		this.generateGrid();
+		this.checkCookie();
+
+		this.overlay.setStyle('display', 'block');
+	},
+
+	generateGrid: function () {
+		// Override the default overlay height with the actual page height
+		var pageHeight = document.id(document).getScrollSize().y;
+		this.overlay.set('height', pageHeight);
+
+		// Add the first grid line so that we can measure it
+		this.overlay.adopt(new Element('div', {'class': 'horiz first-line'}));
+
+		// Calculate the number of grid lines needed
+		var gridLines = this.overlay.getChildren('.horiz'),
+			gridLineHeight = gridLines[0].getStyle('height').toFloat() + gridLines[0].getStyle('borderBottomWidth').toFloat(),
+			numGridLines = Math.floor(pageHeight / gridLineHeight),
+			i = numGridLines - 1;
+
+		// Add the remaining grid lines
+		while (i--) {
+			this.overlay.adopt(new Element('div', {'class': 'horiz'}));
+		}
+	},
+
+	checkCookie: function () {
+		this.Cookie = new Cookie(this.options.cookiePrefix + this.overlay.get('id'));
+		if (this.Cookie.read()) {
+			this.visible = true;
+			this.sticky = true;
+			this.overlay.setStyle('display', 'block');
+		}
+	}
+});
+/*
 $(document).ready(function() {
 
 	var grid = new GridOverlay('grid');
 
 });
 
-
 /**
  * Grid overlay
  */
+/*
 var GridOverlay = function(id) {
 
 	var overlayEl = $('<div id="' + id + '"></div>'),
@@ -113,14 +181,15 @@ var GridOverlay = function(id) {
 	});
 
 }
-
+*/
 
 /**
  * Cookie functions
- * 
+ *
  * By Peter-Paul Koch:
  * http://www.quirksmode.org/js/cookies.html
  */
+/*
 function createCookie(name,value,days) {
 	if (days) {
 		var date = new Date();
@@ -145,3 +214,4 @@ function readCookie(name) {
 function eraseCookie(name) {
 	createCookie(name,"",-1);
 }
+*/
