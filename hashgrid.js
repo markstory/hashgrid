@@ -1,14 +1,19 @@
 /**
- * Overlay tool (jQuery version)
+ * Overlay tool (Mootools version)
+ * Ported to Mootools and programatic column control by Mark Story (http://mark-story.com)
+ *
  * http://github.com/dotjay/hashgrid
  * Version 1, 21 Dec 2009
  * By Jon Gibbins, accessibility.co.uk
- *
- * Ported to work with Mootools by Mark Story (http://mark-story.com)
  */
+var GRID_OPTIONS = {
+	width: 980,  //width of your layout.
+	gutters: 20, //space between each column
+	columns: 6 // Number of columns you want on your grid.
+};
 
 window.addEvent('domready', function () {
-	var grid = new GridOverlay('grid');
+	var grid = new GridOverlay('grid', GRID_OPTIONS);
 })
 
 var GridOverlay = new Class({
