@@ -6,6 +6,7 @@
  *
  * Ported to work with Mootools by Mark Story (http://mark-story.com)
  */
+
 window.addEvent('domready', function () {
 	var grid = new GridOverlay('grid');
 })
@@ -14,7 +15,10 @@ var GridOverlay = new Class({
 	Implements: Options,
 
 	options : {
-		cookiePrefix: 'gridOverlay'
+		cookiePrefix: 'gridOverlay',
+		width: 980,
+		gutters: 20,
+		columns: 6,
 	},
 	overlay: null,
 	visible: false,
@@ -25,7 +29,10 @@ var GridOverlay = new Class({
 		this.setOptions(options || {});
 		var overlayEl = new Element('div', {
 			id: id,
-			styles: {display: 'none'}
+			styles: {
+				display: 'none',
+				width: this.options.width
+			}
 		});
 
 		//remove the existing element if any and append to the DOM
@@ -39,19 +46,20 @@ var GridOverlay = new Class({
 			this.originalZIndex = '-1';
 			this.overlay.setStyle('zIndex', '-1');
 		}
-		this.generateGrid();
+		this.horizontalLines();
+		this.verticalLines();
 		this.checkCookie();
 		this.bindEvents();
 	},
 
-	generateGrid: function () {
+	horizontalLines: function () {
 		// Override the default overlay height with the actual page height
 		var pageHeight = document.id(document).getScrollSize().y;
 		this.overlay.set('height', pageHeight);
 
 		// Add the first grid line so that we can measure it
 		this.overlay.adopt(new Element('div', {'class': 'horiz first-line'}));
-
+		
 		// Calculate the number of grid lines needed
 		var gridLines = this.overlay.getChildren('.horiz'),
 			gridLineHeight = gridLines[0].getStyle('height').toFloat() + gridLines[0].getStyle('borderBottomWidth').toFloat(),
@@ -61,6 +69,49 @@ var GridOverlay = new Class({
 		// Add the remaining grid lines
 		while (i--) {
 			this.overlay.adopt(new Element('div', {'class': 'horiz'}));
+		}
+	},
+	
+	verticalLines: function () {
+		var columns = this.options.columns,
+			gutterCount = columns + 1,
+			columnWidth = (this.options.width - (gutterCount * this.options.gutters)) / columns,
+			i = columns - 1;
+
+		var pageHeight = document.id(document).getScrollSize().y;
+		var firstColumn = new Element('div', {
+			'class': 'vert',
+			styles: {
+				position: 'absolute',
+				height: pageHeight,
+				top: 0
+			}
+		});
+		this.overlay.adopt(firstColumn);
+		var leftBorder = firstColumn.getStyle('borderLeftWidth').toInt(),
+			rightBorder = firstColumn.getStyle('borderRightWidth').toInt(),
+			gutterWidth = this.options.gutters - leftBorder, //gutter includes 1 border
+			columnWidth = columnWidth - rightBorder, //column includes the other border
+			columnOffset = gutterWidth + columnWidth + leftBorder + rightBorder; //offset = gutter + column + borders
+
+		firstColumn.setStyles({
+			left: gutterWidth,
+			width: columnWidth
+		});
+
+		var offset = gutterWidth + columnOffset;
+		while (i--) {
+			this.overlay.adopt(new Element('div', {
+				'class': 'vert',
+				styles: {
+					position: 'absolute',
+					height: pageHeight,
+					width: columnWidth,
+					left: offset,
+					top: 0
+				}
+			}));
+			offset += columnOffset
 		}
 	},
 
