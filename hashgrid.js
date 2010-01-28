@@ -23,7 +23,7 @@ var GridOverlay = new Class({
 		cookiePrefix: 'gridOverlay',
 		width: 980,
 		gutters: 20,
-		columns: 6,
+		columns: 6
 	},
 	overlay: null,
 	visible: false,
